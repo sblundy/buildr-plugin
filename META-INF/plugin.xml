@@ -1,0 +1,41 @@
+<!DOCTYPE idea-plugin PUBLIC "Plugin/DTD" "http://plugins.intellij.net/plugin.dtd">
+<idea-plugin url="http://www.digitalsanctum.com/buildr-plug-in/">
+    <id>Buildr</id>
+    <name>Buildr</name>
+    <category>Build</category>
+    <description>
+        <![CDATA[A plug-in for the Buildr build system. You must <a href="http://incubator.apache.org/buildr/getting_started.html#installing_buildr">install Buildr</a> prior to installing the plug-in.]]></description>
+    <version>8.11.22</version>
+    <change-notes><![CDATA[ <a href="http://www.digitalsanctum.com/buildr-plug-in/">Change log</a> ]]></change-notes>
+    <vendor email="shane@digitalsanctum.com" url="http://www.digitalsanctum.com">Digital Sanctum, Inc.</vendor>
+    <idea-version since-build="9013"/>
+    <resource-bundle xmlns="">com.digitalsanctum.idea.plugins.buildr.BuildrBundle</resource-bundle>
+
+    <extensions defaultExtensionNs="com.intellij">
+        <!--<errorHandler implementation="com.digitalsanctum.idea.plugins.buildr.error.BuildrErrorReportSubmitter"/>-->
+        <applicationService serviceInterface="com.digitalsanctum.idea.plugins.buildr.settings.BuildrApplicationSettings"
+                            serviceImplementation="com.digitalsanctum.idea.plugins.buildr.settings.BuildrApplicationSettings"/>
+    </extensions>
+
+    <application-components>
+        <component>
+            <implementation-class>com.digitalsanctum.idea.plugins.buildr.BuildrComponent</implementation-class>
+        </component>
+        <component>
+            <implementation-class>com.digitalsanctum.idea.plugins.buildr.settings.BuildrSettings</implementation-class>
+        </component>
+    </application-components>
+
+    <project-components>
+        <component>
+            <implementation-class>com.digitalsanctum.idea.plugins.buildr.BuildrProjectComponent</implementation-class>
+        </component>
+    </project-components>
+
+    <actions>
+        <action id="BuildrVersion" class="com.digitalsanctum.idea.plugins.buildr.actions.BuildrVersionAction"
+                text="Buildr Version">
+            <add-to-group group-id="HelpMenu" anchor="last"/>
+        </action>
+    </actions>
+</idea-plugin>
