@@ -30,6 +30,12 @@
         <component>
             <implementation-class>com.digitalsanctum.idea.plugins.buildr.BuildrProjectComponent</implementation-class>
         </component>
+        <component>
+            <implementation-class>com.digitalsanctum.idea.plugins.buildr.BuildrTasksListComponent</implementation-class>
+        </component>
+        <component>
+            <implementation-class>com.digitalsanctum.idea.plugins.buildr.BuildrTaskOutputComponent</implementation-class>
+        </component>
     </project-components>
 
     <actions>
@@ -37,5 +43,16 @@
                 text="Buildr Version">
             <add-to-group group-id="HelpMenu" anchor="last"/>
         </action>
+        <group id="taskOutputToolbar">
+            <action id="cleanTaskOutput" class="com.digitalsanctum.idea.plugins.buildr.actions.ClearTaskOutputAction"
+                    text="Clear"/>
+        </group>
+
+        <group id="taskPaneToolbar">
+            <action id="refreshTaskList" class="com.digitalsanctum.idea.plugins.buildr.actions.RefreshTaskListAction"
+                    icon="/actions/sync.png"/>
+            <action id="runTask" class="com.digitalsanctum.idea.plugins.buildr.actions.RunTaskAction"
+                    icon="/actions/execute.png"/>
+        </group>
     </actions>
 </idea-plugin>

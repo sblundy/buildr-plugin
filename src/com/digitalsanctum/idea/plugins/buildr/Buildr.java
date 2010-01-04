@@ -25,5 +25,7 @@ public interface Buildr {
   public static final Icon BUILDR_32 = IconLoader.getIcon("/com/digitalsanctum/idea/plugins/buildr/buildr-32x32.png");
 
   public static final String BUILDR_TOOL_WINDOW_ID = "Buildr";
-  public static final String BUILDR_OUTPUT_WINDOW_ID = "Buildr Output";  
+  public static final String BUILDR_OUTPUT_WINDOW_ID = "Buildr Output";
+  public static final String BUILDR_OUTPUT_DISPLAY_NAME = "BuildrOutput";
+  public static final String BUILDR_TASKS_DISPLAY_NAME = "Tasks";
 }

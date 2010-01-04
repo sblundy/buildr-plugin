@@ -1,20 +1,16 @@
 package com.digitalsanctum.idea.plugins.buildr.ui;
 
 import com.digitalsanctum.idea.plugins.buildr.Buildr;
-import com.digitalsanctum.idea.plugins.buildr.exception.BuildrPluginException;
-import com.digitalsanctum.idea.plugins.buildr.model.BuildrProject;
+import com.digitalsanctum.idea.plugins.buildr.BuildrProjectComponent;
 import com.digitalsanctum.idea.plugins.buildr.model.BuildrTask;
-import com.digitalsanctum.idea.plugins.buildr.run.BuildrRunner;
-import com.digitalsanctum.idea.plugins.buildr.run.Output;
-import com.intellij.openapi.wm.ToolWindow;
-import com.intellij.openapi.wm.ToolWindowManager;
-import com.intellij.util.ui.UIUtil;
+import com.intellij.openapi.actionSystem.ActionManager;
+import com.intellij.openapi.actionSystem.DefaultActionGroup;
 
 import javax.swing.*;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
-import java.awt.*;
+import java.util.Collections;
 import java.util.List;
 
 /**
@@ -25,19 +21,15 @@ import java.util.List;
  */
 public class BuildrTasksPane implements Buildr {
     private JPanel tasksPanel;
-    private JScrollPane taskScrollPane;
-    private JTextField commandTextField;
-    private JLabel commandLabel;
+    @SuppressWarnings("unused")
+    private JComponent toolbar;
     private JList taskList;
 
-    private BuildrProject buildrProject;
-    private TaskOutputPane taskOutputPane;
+    private BuildrProjectComponent buildrProject;
 
 
-    public BuildrTasksPane(BuildrProject buildrProject, TaskOutputPane taskOutputPane) {
+    public BuildrTasksPane(BuildrProjectComponent buildrProject) {
         this.buildrProject = buildrProject;
-        this.taskOutputPane = taskOutputPane;
-        this.taskList = getTaskList();
     }
 
     public JPanel getTasksPanel() {
@@ -45,33 +37,16 @@ public class BuildrTasksPane implements Buildr {
     }
 
     private JList getTaskList() {
-        List<BuildrTask> bTasks = buildrProject.getAvailableTasks();
-        if (bTasks.isEmpty()) return null;
+        final List<BuildrTask> bTasks = buildrProject.getBuildrProject().getAvailableTasks();
 
-        final String[] tasks = new String[bTasks.size()];
-        int i = 0;
-        for (BuildrTask buildrTask : bTasks) {
-            tasks[i++] = buildrTask.getName();
-        }
-
-        final JList taskList = new JList(tasks);
+        final JList taskList = new JList(new TaskListModel(bTasks));
 
         MouseListener mouseListener = new MouseAdapter() {
             public void mouseClicked(MouseEvent e) {
                 if (e.getClickCount() == 2) {
                     int index = taskList.locationToIndex(e.getPoint());
-                    BuildrRunner br = new BuildrRunner(buildrProject, tasks[index]);
-                    Output output = null;
-                    try {
-                        output = br.runBuildrCommand();
-                    } catch (BuildrPluginException e1) {
-                        e1.printStackTrace();
-                    }
-                    if (br.hasErrors()) {
-                        logAndShow(output.getStderr());
-                    } else {
-                        logAndShow(output.getStdout());
-                    }
+                    final String selectedTask = (String) taskList.getModel().getElementAt(index);
+                    buildrProject.runTask(selectedTask);
                 }
             }
         };
@@ -79,24 +54,50 @@ public class BuildrTasksPane implements Buildr {
         return taskList;
     }
 
-    private void logAndShow(String message) {
-        taskOutputPane.log(message);
-        ToolWindowManager twm = ToolWindowManager.getInstance(buildrProject.getProject());
-        ToolWindow buildrOutputWindow = twm.getToolWindow(BUILDR_OUTPUT_WINDOW_ID);
-        buildrOutputWindow.show(new Runnable() {
-            public void run() {
-            }
-        });
+    private void createUIComponents() {
+        this.taskList = getTaskList();
+
+        final DefaultActionGroup taskPaneToolbar =
+                ((DefaultActionGroup) ActionManager.getInstance().getAction("taskPaneToolbar"));
+        this.toolbar = ActionManager.getInstance().createActionToolbar("Buildr", taskPaneToolbar, true).getComponent();
     }
 
-    private void createUIComponents() {
-        tasksPanel = new JPanel(new BorderLayout());
-        if (taskList != null) {
-            taskScrollPane = new JScrollPane(taskList);
-        } else {
-            taskScrollPane = new JScrollPane();
+    public void refreshTaskList() {
+        if (null != this.taskList) {
+            final List<BuildrTask> bTasks = buildrProject.getBuildrProject().getAvailableTasks();
+            if (null == bTasks) {
+                this.taskList.setModel(new TaskListModel(Collections.<BuildrTask>emptyList()));
+            } else {
+                this.taskList.setModel(new TaskListModel(bTasks));
+            }
         }
-        tasksPanel.setBackground(UIUtil.getTreeTextBackground());
-        tasksPanel.add(taskScrollPane);
+    }
+
+    public void runSelectedTask() {
+        if (this.taskList.getSelectedIndex() >= 0) {
+            buildrProject.runTask((String) this.taskList.getSelectedValue());
+        }
+    }
+
+    public boolean isTaskSelected() {
+        return this.taskList.getSelectedIndex() >= 0;
+    }
+
+    private class TaskListModel extends AbstractListModel {
+        final List<String> tasks = new java.util.ArrayList<String>();
+
+        public TaskListModel(List<BuildrTask> bTasks) {
+            for (BuildrTask buildrTask : bTasks) {
+                tasks.add(buildrTask.getName());
+            }
+        }
+
+        public int getSize() {
+            return tasks.size();
+        }
+
+        public Object getElementAt(int index) {
+            return tasks.get(index);
+        }
     }
 }

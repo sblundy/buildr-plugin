@@ -1,5 +1,8 @@
 package com.digitalsanctum.idea.plugins.buildr.ui;
 
+import com.intellij.openapi.actionSystem.ActionGroup;
+import com.intellij.openapi.actionSystem.ActionManager;
+import com.intellij.openapi.actionSystem.AnAction;
 import com.intellij.openapi.editor.colors.EditorColorsManager;
 import com.intellij.openapi.editor.colors.EditorColors;
 
@@ -22,7 +25,7 @@ public class TaskOutputPane {
 
   private JPanel mainPanel;
   private JEditorPane outputPane;
-  private JButton clearButton;
+  private JComponent clearButton;
 
   public TaskOutputPane() {
 
@@ -42,13 +45,15 @@ public class TaskOutputPane {
 
   private void createUIComponents() {
     outputPane = new JEditorPane();
+    final AnAction clear = ActionManager.getInstance().getAction("taskOutputToolbar");
+    this.clearButton = ActionManager.getInstance().createButtonToolbar("Buildr", (ActionGroup) clear);
   }
 
   public JComponent getPanel() {
     return mainPanel;
   }
 
-  private void clear() {
+  public void clear() {
     outputPane.setText("");
   }
 
@@ -86,6 +91,4 @@ public class TaskOutputPane {
   private String getTimeStamp() {
     return formatter.format(new Date());
   }
-
-
 }

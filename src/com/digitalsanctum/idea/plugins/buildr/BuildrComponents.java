@@ -16,5 +16,9 @@ public interface BuildrComponents {
   @NonNls
   final String BUILDR_PROJECT_COMPONENT = "BuildrProjectComponent";
   @NonNls
+  final String BUILDR_TASK_LIST_COMPONENT = "BuildrTaskListComponent";
+  @NonNls
+  final String BUILDR_OUTPUT_COMPONENT = "BuildrOutputComponent";
+  @NonNls
   final String BUILDR_SETTINGS = "BuildrSettingsComponent";
 }
