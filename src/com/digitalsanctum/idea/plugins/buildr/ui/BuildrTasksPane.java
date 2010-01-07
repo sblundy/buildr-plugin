@@ -4,7 +4,9 @@ import com.digitalsanctum.idea.plugins.buildr.Buildr;
 import com.digitalsanctum.idea.plugins.buildr.BuildrProjectComponent;
 import com.digitalsanctum.idea.plugins.buildr.model.BuildrTask;
 import com.intellij.openapi.actionSystem.ActionManager;
+import com.intellij.openapi.actionSystem.DataContext;
 import com.intellij.openapi.actionSystem.DefaultActionGroup;
+import com.intellij.openapi.diagnostic.Logger;
 
 import javax.swing.*;
 import java.awt.event.MouseAdapter;
@@ -20,6 +22,7 @@ import java.util.List;
  * Time: 7:09:45 AM
  */
 public class BuildrTasksPane implements Buildr {
+    private static final Logger LOG = Logger.getInstance(BuildrTasksPane.class.getName());
     private JPanel tasksPanel;
     @SuppressWarnings("unused")
     private JComponent toolbar;
@@ -44,9 +47,8 @@ public class BuildrTasksPane implements Buildr {
         MouseListener mouseListener = new MouseAdapter() {
             public void mouseClicked(MouseEvent e) {
                 if (e.getClickCount() == 2) {
-                    int index = taskList.locationToIndex(e.getPoint());
-                    final String selectedTask = (String) taskList.getModel().getElementAt(index);
-                    buildrProject.runTask(selectedTask);
+                    ActionManager.getInstance().tryToExecute(ActionManager.getInstance().getAction("runTask"), e,
+                            taskList, null, true);
                 }
             }
         };
@@ -73,9 +75,14 @@ public class BuildrTasksPane implements Buildr {
         }
     }
 
-    public void runSelectedTask() {
-        if (this.taskList.getSelectedIndex() >= 0) {
-            buildrProject.runTask((String) this.taskList.getSelectedValue());
+    public void runSelectedTask(DataContext context) {
+        LOG.debug("in runSelectedTask:" + this.taskList.getSelectedIndex());
+        if (this.taskList.getSelectedIndices().length >= 0) {
+            final List<String> tasks = new java.util.ArrayList<String>();
+            for (Object task : this.taskList.getSelectedValues()) {
+                tasks.add((String) task);
+            }
+            buildrProject.runTask(context, tasks);
         }
     }
 

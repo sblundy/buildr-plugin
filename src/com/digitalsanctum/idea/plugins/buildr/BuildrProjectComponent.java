@@ -1,11 +1,18 @@
 package com.digitalsanctum.idea.plugins.buildr;
 
-import com.digitalsanctum.idea.plugins.buildr.exception.BuildrPluginException;
+import com.digitalsanctum.idea.plugins.buildr.execution.BuildrConfigurationType;
+import com.digitalsanctum.idea.plugins.buildr.execution.BuildrRunConfiguration;
 import com.digitalsanctum.idea.plugins.buildr.model.BuildrProject;
-import com.digitalsanctum.idea.plugins.buildr.run.BuildrRunner;
-import com.digitalsanctum.idea.plugins.buildr.run.Output;
+import com.intellij.execution.*;
+import com.intellij.execution.configurations.ConfigurationTypeUtil;
+import com.intellij.execution.executors.DefaultRunExecutor;
+import com.intellij.execution.runners.ExecutionEnvironment;
+import com.intellij.execution.runners.ProgramRunner;
+import com.intellij.openapi.actionSystem.DataContext;
 import com.intellij.openapi.components.ProjectComponent;
+import com.intellij.openapi.diagnostic.Logger;
 import com.intellij.openapi.project.Project;
+import org.apache.commons.lang.StringUtils;
 import org.jetbrains.annotations.NonNls;
 import org.jetbrains.annotations.NotNull;
 
@@ -17,9 +24,9 @@ import java.util.List;
  * Time: 8:37:27 AM
  */
 public class BuildrProjectComponent implements ProjectComponent, Buildr {
+    private static final Logger LOG = Logger.getInstance(BuildrProjectComponent.class.getName());
+
     private BuildrProject buildrProject;
-    private final List<TaskOutputListener> taskOutputListeners =
-            new java.util.ArrayList<TaskOutputListener>();
 
     public BuildrProjectComponent(Project project) {
         this.buildrProject = new BuildrProject(project);
@@ -48,31 +55,26 @@ public class BuildrProjectComponent implements ProjectComponent, Buildr {
         return this.buildrProject;
     }
 
-    public void addExecutionListener(TaskOutputListener l) {
-        this.taskOutputListeners.add(l);
-    }
+    public void runTask(DataContext context, List<String> selectedTask) {
+        LOG.debug("in runTask:" + selectedTask);
 
-    public void removeExecutionListener(TaskOutputListener listener) {
-        this.taskOutputListeners.remove(listener);
-    }
+        BuildrConfigurationType type = ConfigurationTypeUtil.findConfigurationType(BuildrConfigurationType.class);
 
-    public void runTask(String selectedTask) {
-        final BuildrRunner br = new BuildrRunner(buildrProject, selectedTask);
+        final RunnerAndConfigurationSettings configSettings = RunManager.getInstance(buildrProject.getProject())
+          .createRunConfiguration(StringUtils.join(selectedTask, ','), type.getMyConfigurationFactory());
+        BuildrRunConfiguration runConfiguration = (BuildrRunConfiguration)configSettings.getConfiguration();
+        runConfiguration.setTasks(selectedTask);
+        ProgramRunner runner = RunnerRegistry.getInstance().findRunnerById(DefaultRunExecutor.EXECUTOR_ID);
+        assert runner != null;
+        ExecutionEnvironment env = new ExecutionEnvironment(runner, configSettings, context);
+        Executor executor = DefaultRunExecutor.getRunExecutorInstance();
+
         try {
-            final Output output = br.runBuildrCommand();
-            if (br.hasErrors()) {
-                logAndShow(output.getStderr());
-            } else {
-                logAndShow(output.getStdout());
-            }
-        } catch (BuildrPluginException e1) {
-            e1.printStackTrace();
+          runner.execute(executor, env, null);
         }
-    }
+        catch (ExecutionException e) {
+                LOG.error(e);
+        }
 
-    private void logAndShow(String message) {
-        for (TaskOutputListener listener : taskOutputListeners) {
-            listener.log(message);
-        }
     }
 }

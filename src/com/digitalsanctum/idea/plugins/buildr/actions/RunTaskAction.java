@@ -13,7 +13,7 @@ public class RunTaskAction extends AbstractProjectAction {
     public void actionPerformed(AnActionEvent event) {
         BuildrTasksListComponent bpc = findProjectComponent(event.getDataContext(), BuildrTasksListComponent.class);
         if (null != bpc) {
-            bpc.runSelectedTask();
+            bpc.runSelectedTask(event.getDataContext());
         }
     }
 

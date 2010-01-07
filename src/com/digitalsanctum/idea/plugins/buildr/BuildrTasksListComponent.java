@@ -1,6 +1,7 @@
 package com.digitalsanctum.idea.plugins.buildr;
 
 import com.digitalsanctum.idea.plugins.buildr.ui.BuildrTasksPane;
+import com.intellij.openapi.actionSystem.DataContext;
 import com.intellij.openapi.components.ProjectComponent;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.wm.ToolWindow;
@@ -52,12 +53,12 @@ public class BuildrTasksListComponent implements ProjectComponent {
         this.buildrTasksPane.refreshTaskList();
     }
 
-    public void runSelectedTask() {
-        this.buildrTasksPane.runSelectedTask();
+    public void runSelectedTask(DataContext context) {
+        this.buildrTasksPane.runSelectedTask(context);
     }
 
     public boolean isTaskSelected() {
-        return this.buildrTasksPane.isTaskSelected();
+        return null != this.buildrTasksPane && this.buildrTasksPane.isTaskSelected();
     }
 
     private ContentFactory getContentFactory() {
