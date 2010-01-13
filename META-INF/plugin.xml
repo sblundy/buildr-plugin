@@ -5,10 +5,10 @@
     <category>Build</category>
     <description>
         <![CDATA[A plug-in for the Buildr build system. You must <a href="http://incubator.apache.org/buildr/getting_started.html#installing_buildr">install Buildr</a> prior to installing the plug-in.]]></description>
-    <version>8.11.22</version>
+    <version>9.0.0</version>
     <change-notes><![CDATA[ <a href="http://www.digitalsanctum.com/buildr-plug-in/">Change log</a> ]]></change-notes>
     <vendor email="shane@digitalsanctum.com" url="http://www.digitalsanctum.com">Digital Sanctum, Inc.</vendor>
-    <idea-version since-build="9013"/>
+    <idea-version since-build="93.1"/>
     <resource-bundle xmlns="">com.digitalsanctum.idea.plugins.buildr.BuildrBundle</resource-bundle>
 
     <extensions defaultExtensionNs="com.intellij">
@@ -16,6 +16,7 @@
         <applicationService serviceInterface="com.digitalsanctum.idea.plugins.buildr.settings.BuildrApplicationSettings"
                             serviceImplementation="com.digitalsanctum.idea.plugins.buildr.settings.BuildrApplicationSettings"/>
         <configurationType implementation="com.digitalsanctum.idea.plugins.buildr.execution.BuildrConfigurationType"/>
+        <stepsBeforeRunProvider implementation="com.digitalsanctum.idea.plugins.buildr.beforerun.BuildrBeforeRunTaskProvider"/>
     </extensions>
 
     <application-components>

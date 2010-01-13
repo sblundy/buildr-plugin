@@ -61,15 +61,14 @@ public class BuildrProjectComponent implements ProjectComponent, Buildr {
         return this.buildrProject;
     }
 
-    public void runTask(DataContext context, List<String> selectedTask) {
+    public void runTask(DataContext context, @NotNull List<String> selectedTask) {
         LOG.debug("in runTask:" + selectedTask);
 
         final BuildrConfigurationType type = ConfigurationTypeUtil.findConfigurationType(BuildrConfigurationType.class);
         final RunnerAndConfigurationSettings configSettings = RunManager.getInstance(buildrProject.getProject())
                 .createRunConfiguration(StringUtils.join(selectedTask, ','), type.getMyConfigurationFactory());
 
-        final BuildrRunConfiguration runConfiguration = (BuildrRunConfiguration) configSettings.getConfiguration();
-        runConfiguration.setTasks(selectedTask);
+        ((BuildrRunConfiguration) configSettings.getConfiguration()).setTasks(selectedTask);
         final ProgramRunner runner = RunnerRegistry.getInstance().findRunnerById(DefaultRunExecutor.EXECUTOR_ID);
 
         assert runner != null;
@@ -85,25 +84,27 @@ public class BuildrProjectComponent implements ProjectComponent, Buildr {
             LOG.error(e);
         }
 
+        LOG.debug("end runTask:" + selectedTask);
     }
 
     private static class MyRunProfile implements RunProfile {
         private final Project project;
         private final List<String> tasks;
 
-        public MyRunProfile(Project project, List<String> tasks) {
+        public MyRunProfile(@NotNull Project project, @NotNull List<String> tasks) {
             this.project = project;
             this.tasks = tasks;
         }
 
-        public RunProfileState getState(@NotNull Executor executor, @NotNull ExecutionEnvironment environment) throws ExecutionException {
+        public RunProfileState getState(@NotNull Executor executor, @NotNull ExecutionEnvironment environment)
+                throws ExecutionException {
             final BuildrCommandLineState state = new BuildrCommandLineState(environment, tasks);
             state.setConsoleBuilder(TextConsoleBuilderFactory.getInstance().createBuilder(this.project));
             return state;
         }
 
         public String getName() {
-            return StringUtils.join(tasks, ", ");
+            return BuildrBundle.message("runner.name", StringUtils.join(tasks, ", "));
         }
 
         public Icon getIcon() {

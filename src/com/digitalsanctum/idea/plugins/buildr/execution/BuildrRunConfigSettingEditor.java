@@ -1,5 +1,7 @@
 package com.digitalsanctum.idea.plugins.buildr.execution;
 
+import com.digitalsanctum.idea.plugins.buildr.BuildrProjectComponent;
+import com.digitalsanctum.idea.plugins.buildr.ui.BuildrTaskListPanel;
 import com.intellij.openapi.diagnostic.Logger;
 import com.intellij.openapi.options.ConfigurationException;
 import com.intellij.openapi.options.SettingsEditor;
@@ -14,7 +16,12 @@ import javax.swing.*;
  */
 public class BuildrRunConfigSettingEditor extends SettingsEditor<BuildrRunConfiguration> {
     private static final Logger LOG = Logger.getInstance(BuildrRunConfigSettingEditor.class.getName());
-    private final BuildrRunConfigurationForm form = new BuildrRunConfigurationForm();
+    private final BuildrTaskListPanel form;
+
+    public BuildrRunConfigSettingEditor(BuildrProjectComponent buildrProject) {
+        this.form = new BuildrTaskListPanel(buildrProject);
+    }
+    
     @Override
     protected void resetEditorFrom(BuildrRunConfiguration config) {
         LOG.debug("in resetEditorForm:tasks=" + config.getTasks());

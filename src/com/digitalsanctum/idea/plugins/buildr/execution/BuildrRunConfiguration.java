@@ -1,5 +1,6 @@
 package com.digitalsanctum.idea.plugins.buildr.execution;
 
+import com.digitalsanctum.idea.plugins.buildr.BuildrProjectComponent;
 import com.intellij.execution.ExecutionException;
 import com.intellij.execution.Executor;
 import com.intellij.execution.configurations.*;
@@ -34,7 +35,7 @@ public class BuildrRunConfiguration extends RunConfigurationBase implements Modu
     }
 
     public BuildrRunConfigSettingEditor getConfigurationEditor() {
-        return new BuildrRunConfigSettingEditor();
+        return new BuildrRunConfigSettingEditor(getProject().getComponent(BuildrProjectComponent.class));
     }
 
     public JDOMExternalizable createRunnerSettings(ConfigurationInfoProvider provider) {

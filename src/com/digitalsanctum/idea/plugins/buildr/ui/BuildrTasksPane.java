@@ -3,15 +3,15 @@ package com.digitalsanctum.idea.plugins.buildr.ui;
 import com.digitalsanctum.idea.plugins.buildr.Buildr;
 import com.digitalsanctum.idea.plugins.buildr.BuildrProjectComponent;
 import com.digitalsanctum.idea.plugins.buildr.model.BuildrTask;
+import com.intellij.ide.DataManager;
 import com.intellij.openapi.actionSystem.ActionManager;
-import com.intellij.openapi.actionSystem.DataContext;
 import com.intellij.openapi.actionSystem.DefaultActionGroup;
 import com.intellij.openapi.diagnostic.Logger;
+import org.apache.commons.lang.StringUtils;
 
 import javax.swing.*;
-import java.awt.event.MouseAdapter;
-import java.awt.event.MouseEvent;
-import java.awt.event.MouseListener;
+import java.awt.event.*;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
@@ -24,7 +24,7 @@ import java.util.List;
 public class BuildrTasksPane implements Buildr {
     private static final Logger LOG = Logger.getInstance(BuildrTasksPane.class.getName());
     private JPanel tasksPanel;
-    @SuppressWarnings("unused")
+    private JTextField commandTextField;
     private JComponent toolbar;
     private JList taskList;
 
@@ -33,6 +33,15 @@ public class BuildrTasksPane implements Buildr {
 
     public BuildrTasksPane(BuildrProjectComponent buildrProject) {
         this.buildrProject = buildrProject;
+        this.commandTextField.addKeyListener(new KeyAdapter() {
+            @Override
+            public void keyTyped(KeyEvent e) {
+                if(KeyEvent.VK_ENTER == e.getKeyChar()) {
+                    ActionManager.getInstance().tryToExecute(ActionManager.getInstance().getAction("runTask"), e,
+                            commandTextField, null, true);
+                }
+            }
+        });
     }
 
     public JPanel getTasksPanel() {
@@ -40,16 +49,16 @@ public class BuildrTasksPane implements Buildr {
     }
 
     private JList getTaskList() {
-        final List<BuildrTask> bTasks = buildrProject.getBuildrProject().getAvailableTasks();
+        final JList taskList = new JList(new TaskListModel(buildrProject.getBuildrProject().getAvailableTasks()));
 
-        final JList taskList = new JList(new TaskListModel(bTasks));
-
-        MouseListener mouseListener = new MouseAdapter() {
+        final MouseListener mouseListener = new MouseAdapter() {
             public void mouseClicked(MouseEvent e) {
+                LOG.debug("in mouseClicked:" + e.getClickCount());
                 if (e.getClickCount() == 2) {
-                    ActionManager.getInstance().tryToExecute(ActionManager.getInstance().getAction("runTask"), e,
-                            taskList, null, true);
+                    buildrProject.runTask(DataManager.getInstance().getDataContext(),
+                            Arrays.asList((String) taskList.getSelectedValue()));
                 }
+                LOG.debug("end mouseClicked:" + e.getClickCount());
             }
         };
         taskList.addMouseListener(mouseListener);
@@ -75,36 +84,11 @@ public class BuildrTasksPane implements Buildr {
         }
     }
 
-    public void runSelectedTask(DataContext context) {
-        LOG.debug("in runSelectedTask:" + this.taskList.getSelectedIndex());
-        if (this.taskList.getSelectedIndices().length >= 0) {
-            final List<String> tasks = new java.util.ArrayList<String>();
-            for (Object task : this.taskList.getSelectedValues()) {
-                tasks.add((String) task);
-            }
-            buildrProject.runTask(context, tasks);
-        }
-    }
-
     public boolean isTaskSelected() {
-        return this.taskList.getSelectedIndex() >= 0;
+        return StringUtils.isNotBlank(this.commandTextField.getText());
     }
 
-    private class TaskListModel extends AbstractListModel {
-        final List<String> tasks = new java.util.ArrayList<String>();
-
-        public TaskListModel(List<BuildrTask> bTasks) {
-            for (BuildrTask buildrTask : bTasks) {
-                tasks.add(buildrTask.getName());
-            }
-        }
-
-        public int getSize() {
-            return tasks.size();
-        }
-
-        public Object getElementAt(int index) {
-            return tasks.get(index);
-        }
+    public List<String> getCommand() {
+        return Arrays.asList(StringUtils.split(this.commandTextField.getText(), " "));
     }
 }

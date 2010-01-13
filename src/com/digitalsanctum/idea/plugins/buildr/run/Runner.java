@@ -120,7 +120,7 @@ public class Runner {
    * @throws com.digitalsanctum.idea.plugins.buildr.exception.BuildrPluginException
    *
    */
-  @Nullable
+  @NotNull
   public static Process createProcess(@Nullable final String workingDir,
                                       @NotNull final String... command) throws BuildrPluginException {
     Process process = null;
